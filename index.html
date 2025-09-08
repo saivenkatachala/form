@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey Form</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f7f8;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+.container{background:#caf0f8;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);width:100%;max-width:500px}
+h2{text-align:center;margin-bottom:20px}
+form label{display:block;margin-top:10px;font-weight:bold}
+form input,form select,form textarea{width:100%;padding:8px;margin-top:5px;border:1px solid #ccc;border-radius:5px;font-size:14px}
+button{margin-top:15px;width:100%;padding:10px;background:#415a77;color:#fff;border:none;border-radius:5px;font-size:16px;cursor:pointer}
+button:hover{background:#778da9}
+@media(max-width:600px){.container{padding:15px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Survey Form</h2>
+  <form id="surveyForm">
+    <label>Name</label>
+    <input type="text" name="name" required>
+
+    <label>Phone</label>
+    <input type="tel" name="phone" required>
+
+    <label>Age</label>
+    <input type="number" name="age" required>
+
+    <label>Gender</label>
+    <select name="gender" required>
+      <option value="">Select</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+    </select>
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>State</label>
+    <select name="state" id="state" required>
+      <option value="">Select State</option>
+      <option value="Andhra Pradesh">Andhra Pradesh</option>
+      <option value="Telangana">Telangana</option>
+    </select>
+
+    <label>District</label>
+    <input list="districtList" id="district" name="district" required placeholder="Search or select district">
+    <datalist id="districtList"></datalist>
+
+    <label>Mandal</label>
+    <input list="mandalList" id="mandal" name="mandal" required placeholder="Search or select mandal">
+    <datalist id="mandalList"></datalist>
+
+    <label>Address</label>
+    <textarea name="address" rows="3" required></textarea>
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+<script>
+const districtData={
+  "Andhra Pradesh":{
+    "Srikakulam":["a","b","c","d","e"],
+    "Parvathipuram Manyam":["a","b","c","d","e"],
+    "Vizianagaram":["a","b","c","d","e"],
+    "Visakhapatnam":["a","b","c","d","e"],
+    "Alluri Sitharama Raju":["a","b","c","d","e"],
+    "Anakapalli":["a","b","c","d","e"],
+    "Kakinada":["a","b","c","d","e"],
+    "East Godavari":["a","b","c","d","e"],
+    "Dr. B. R. Ambedkar Konaseema":["a","b","c","d","e"],
+    "Eluru":["a","b","c","d","e"],
+    "West Godavari":["a","b","c","d","e"],
+    "NTR":["a","b","c","d","e"],
+    "Krishna":["a","b","c","d","e"],
+    "Palnadu":["a","b","c","d","e"],
+    "Guntur":["Guntur","Tenali","Mangalagiri"],
+    "Bapatla":["a","b","c","d","e"],
+    "Sri Potti Sriramulu Nellore":["a","b","c","d","e"],
+    "Prakasam":["a","b","c","d","e"],
+    "Kurnool":["a","b","c","d","e"],
+    "Nandyal":["a","b","c","d","e"],
+    "Anantapur":["Anantapur","Dharmavaram","Guntakal"],
+    "Chittoor":["Chittoor","Tirupati","Madanapalle"],
+    "Sri Sathya Sai":["a","b","c","d","e"],
+    "YSR Kadapa":["a","b","c","d","e"],
+    "Annamayya":["a","b","c","d","e"],
+    "Tirupati":["a","b","c","d","e"]
+  },
+  "Telangana":{
+    "Adilabad": ["Adilabad", "Utnoor", "Boath"],
+    "Bhadradri Kothagudem": ["Kothagudem", "Bhadrachalam", "Palvancha"],
+    "Hyderabad": ["Secunderabad", "Amberpet", "Charminar"],
+    "Jagtial": ["Jagtial", "Metpalli", "Korutla"],
+    "Jangaon": ["Jangaon", "Narmetta", "Lingala Ghanpur"],
+    "Jayashankar Bhupalpally": ["Bhupalpally", "Chityal", "Mulugu"],
+    "Jogulamba Gadwal": ["Gadwal", "Alampur", "Itikyal"],
+    "Kamareddy": ["Kamareddy", "Banswada", "Yellareddy"],
+    "Karimnagar": ["Karimnagar", "Choppadandi", "Manakondur"],
+    "Khammam": ["Khammam", "Wyra", "Sathupalli"],
+    "Komaram Bheem Asifabad": ["Asifabad", "Sirpur", "Rebbena"],
+    "Mahabubabad": ["Mahabubabad", "Bayyaram", "Narsimhulapet"],
+    "Mahabubnagar": ["Mahabubnagar", "Jadcherla", "Bhoothpur"],
+    "Mancherial": ["Mancherial", "Bellampalli", "Luxettipet"],
+    "Medak": ["Medak", "Ramayampet", "Papannapet"],
+    "Medchal–Malkajgiri": ["Malkajgiri", "Keesara", "Ghatkesar"],
+    "Mulugu": ["Mulugu", "Venkatapuram", "Eturnagaram"],
+    "Nagarkurnool": ["Nagarkurnool", "Achampet", "Amrabad"],
+    "Nalgonda": ["Nalgonda", "Devarakonda", "Miryalaguda"],
+    "Narayanpet": ["Narayanpet", "Makthal", "Kosgi"],
+    "Nirmal": ["Nirmal", "Laxmanchanda", "Dilawarpur"],
+    "Nizamabad": ["Nizamabad", "Bodhan", "Armur"],
+    "Peddapalli": ["Peddapalli", "Manthani", "Ramagundam"],
+    "Rajanna Sircilla": ["Sircilla", "Vemulawada", "Ellareddypet"],
+    "Ranga Reddy": ["Shamshabad", "Ibrahimpatnam", "Chevella"],
+    "Sangareddy": ["Sangareddy", "Patancheru", "Zaheerabad"],
+    "Siddipet": ["Siddipet", "Dubbak", "Husnabad"],
+    "Suryapet": ["Suryapet", "Kodad", "Huzurnagar"],
+    "Vikarabad": ["Vikarabad", "Tandur", "Parigi"],
+    "Wanaparthy": ["Wanaparthy", "Ghanpur", "Pebbair"],
+    "Warangal": ["Warangal", "Narsampet", "Parkal"],
+    "Yadadri Bhuvanagiri": ["Bhongir", "Bibinagar", "Motakondur"]
+  }
+};
+
+const state=document.getElementById("state");
+const district=document.getElementById("district");
+const districtList=document.getElementById("districtList");
+const mandal=document.getElementById("mandal");
+const mandalList=document.getElementById("mandalList");
+
+state.addEventListener("change",()=>{
+  district.value="";
+  mandal.value="";
+  districtList.innerHTML="";
+  mandalList.innerHTML="";
+  if(state.value){
+    Object.keys(districtData[state.value]).forEach(d=>{
+      let option=document.createElement("option");
+      option.value=d;
+      districtList.appendChild(option);
+    });
+  }
+});
+
+district.addEventListener("input",()=>{
+  mandal.value="";
+  mandalList.innerHTML="";
+  if(district.value && districtData[state.value][district.value]){
+    districtData[state.value][district.value].forEach(m=>{
+      let option=document.createElement("option");
+      option.value=m;
+      mandalList.appendChild(option);
+    });
+  }
+});
+
+document.getElementById("surveyForm").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const formData=Object.fromEntries(new FormData(e.target).entries());
+  await fetch("https://script.google.com/macros/s/AKfycbwpbHiQw-cPXf8F4DIontnbkIlHw3Xno1Ci0wWBU3Q5av5D0wkH2HWsKY5G1PaCXieTdA/exec",{
+    method:"POST",
+    body:JSON.stringify(formData)
+  });
+  alert("Form Submitted Successfully!");
+  e.target.reset();
+  districtList.innerHTML="";
+  mandalList.innerHTML="";
+});
+</script>
+</body>
+</html>
