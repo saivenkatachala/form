@@ -3,16 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" type="image/png" href="coin.png" />
 <title>Survey Form</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f4f7f8;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
-.container{background:#caf0f8;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);width:100%;max-width:500px}
-h2{text-align:center;margin-bottom:20px}
-form label{display:block;margin-top:10px;font-weight:bold}
-form input,form select,form textarea{width:100%;padding:8px;margin-top:5px;border:1px solid #ccc;border-radius:5px;font-size:14px}
-button{margin-top:15px;width:100%;padding:10px;background:#415a77;color:#fff;border:none;border-radius:5px;font-size:16px;cursor:pointer}
-button:hover{background:#778da9}
-@media(max-width:600px){.container{padding:15px}}
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#89f7fe,#66a6ff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+.container {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 450px;
+}
+h2 { text-align:center; margin-bottom:20px; color:#333; }
+label { display:block; margin:8px 0 4px; font-weight:bold; color:#444; }
+input, select, textarea, button {
+  width:100%; padding:10px; margin-bottom:12px;
+  border:1px solid #ccc; border-radius:8px; font-size:14px;
+}
+button {
+  background:#66a6ff; color:white; border:none; cursor:pointer; transition:0.3s;
+}
+button:hover { background:#0056d6; }
+.success { color:green; font-weight:bold; text-align:center; margin-top:10px; }
+.error { color:red; font-weight:bold; text-align:center; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -30,7 +52,7 @@ button:hover{background:#778da9}
 
     <label>Gender</label>
     <select name="gender" required>
-      <option value="">Select</option>
+      <option value="">Select Gender</option>
       <option>Male</option>
       <option>Female</option>
       <option>Other</option>
@@ -47,21 +69,22 @@ button:hover{background:#778da9}
     </select>
 
     <label>District</label>
-    <input list="districtList" id="district" name="district" required placeholder="Search or select district">
-    <datalist id="districtList"></datalist>
+    <select name="district" id="district" required></select>
 
     <label>Mandal</label>
-    <input list="mandalList" id="mandal" name="mandal" required placeholder="Search or select mandal">
-    <datalist id="mandalList"></datalist>
+    <select name="mandal" id="mandal" required></select>
 
     <label>Address</label>
     <textarea name="address" rows="3" required></textarea>
 
     <button type="submit">Submit</button>
   </form>
+  <div id="message"></div>
 </div>
 
 <script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbz-g-vNMx2A9RoZfwKKvTuLkyGy_Py6deNQyDm8yuq6Fsu9JuSKIQNHKCP3fIQvimJCJA/exec";
+
 const districtData={
   "Andhra Pradesh":{
     "Srikakulam":["a","b","c","d","e"],
@@ -127,49 +150,37 @@ const districtData={
   }
 };
 
-const state=document.getElementById("state");
-const district=document.getElementById("district");
-const districtList=document.getElementById("districtList");
-const mandal=document.getElementById("mandal");
-const mandalList=document.getElementById("mandalList");
-
-state.addEventListener("change",()=>{
-  district.value="";
-  mandal.value="";
-  districtList.innerHTML="";
-  mandalList.innerHTML="";
-  if(state.value){
-    Object.keys(districtData[state.value]).forEach(d=>{
-      let option=document.createElement("option");
-      option.value=d;
-      districtList.appendChild(option);
-    });
-  }
+document.getElementById("state").addEventListener("change", function() {
+  let districts = Object.keys(districtData[this.value] || {});
+  let districtSelect = document.getElementById("district");
+  districtSelect.innerHTML = "<option value=''>Select District</option>";
+  districts.forEach(d => districtSelect.innerHTML += `<option value="${d}">${d}</option>`);
+  document.getElementById("mandal").innerHTML = "<option value=''>Select Mandal</option>";
 });
 
-district.addEventListener("input",()=>{
-  mandal.value="";
-  mandalList.innerHTML="";
-  if(district.value && districtData[state.value][district.value]){
-    districtData[state.value][district.value].forEach(m=>{
-      let option=document.createElement("option");
-      option.value=m;
-      mandalList.appendChild(option);
-    });
-  }
+document.getElementById("district").addEventListener("change", function() {
+  let state = document.getElementById("state").value;
+  let mandals = districtData[state]?.[this.value] || [];
+  let mandalSelect = document.getElementById("mandal");
+  mandalSelect.innerHTML = "<option value=''>Select Mandal</option>";
+  mandals.forEach(m => mandalSelect.innerHTML += `<option value="${m}">${m}</option>`);
 });
 
-document.getElementById("surveyForm").addEventListener("submit",async(e)=>{
+document.getElementById("surveyForm").addEventListener("submit", async function(e){
   e.preventDefault();
-  const formData=Object.fromEntries(new FormData(e.target).entries());
-  await fetch("https://script.google.com/macros/s/AKfycbwpbHiQw-cPXf8F4DIontnbkIlHw3Xno1Ci0wWBU3Q5av5D0wkH2HWsKY5G1PaCXieTdA/exec",{
-    method:"POST",
-    body:JSON.stringify(formData)
-  });
-  alert("Form Submitted Successfully!");
-  e.target.reset();
-  districtList.innerHTML="";
-  mandalList.innerHTML="";
+  const formData = new FormData(this); 
+  try {
+    const res = await fetch(scriptURL, { method:"POST", body: formData });
+    const result = await res.json();
+    if(result.success){
+      document.getElementById("message").innerHTML = `<p class="success">Form submitted! Your ID: ${result.id}</p>`;
+      this.reset();
+    } else {
+      document.getElementById("message").innerHTML = `<p class="error">Error: ${result.error}</p>`;
+    }
+  } catch(err){
+    document.getElementById("message").innerHTML = `<p class="error">Failed to submit: ${err.message}</p>`;
+  }
 });
 </script>
 </body>
